@@ -31,10 +31,14 @@
 # 作者：Grochowicz, Aleksander; van Greevenbroek, Koen; Benth, Fred Espen; Zeyringer, Marianne
 # 期刊名称：ENERGY ECONOMICS
 # 出版时间：Feb 2023；卷：118，页：106496
-# JCR分区：
+# JCR分区：SSCI一区
 # 引用位置：
 # 引用原句：
 
+# 输出的结果按实现从近到远排序
+
+
+import openpyxl
 
 def parse_ris(ris_text):
     entries = ris_text.split("ER  -")
@@ -55,6 +59,52 @@ def parse_ris(ris_text):
         parsed_entries.append(parsed_entry)
 
     return parsed_entries
+
+
+def load_jcr_data(filename):
+    workbook = openpyxl.load_workbook(filename)
+    sheet = workbook.active
+
+    jcr_data = {}
+    for row in sheet.iter_rows(min_row=2, values_only=True):  # 跳过标题行
+        journal_name = row[0].upper().strip()  # 将期刊名称转换为大写并去除空格
+        jcr_values = row[5:11]
+        jcr_data[journal_name] = jcr_values
+
+    print("Loaded JCR data:", jcr_data)
+    return jcr_data
+
+
+def get_jcr_ranking(jcr_values):
+    rankings = {
+        "SCIE(Q1)": "SCI一区",
+        "SCIE(Q2)": "SCI二区",
+        "SCIE(Q3)": "SCI三区",
+        "SCIE(Q4)": "SCI四区",
+        "SSCI(Q1)": "SSCI一区",
+        "SSCI(Q2)": "SSCI二区",
+        "SSCI(Q3)": "SSCI三区",
+        "SSCI(Q4)": "SSCI四区"
+    }
+
+    scie_ranks = []
+    ssci_ranks = []
+
+    for value in jcr_values:
+        if value is None:
+            continue
+        if value.startswith("SCIE"):
+            scie_ranks.append(rankings.get(value, value))
+        elif value.startswith("SSCI"):
+            ssci_ranks.append(rankings.get(value, value))
+
+    # 选择最高的分区
+    scie_rank = sorted(scie_ranks)[0] if scie_ranks else None
+    ssci_rank = sorted(ssci_ranks)[0] if ssci_ranks else None
+
+    final_ranks = [rank for rank in [scie_rank, ssci_rank] if rank]
+
+    return ", ".join(final_ranks)
 
 
 def format_entry(entry):
@@ -90,6 +140,8 @@ def main():
     with open("sample.ris", "r", encoding="utf-8") as f:
         ris_text = f.read()
 
+    jcr_data = load_jcr_data("2021JCR.xlsx")
+
     parsed_entries = parse_ris(ris_text)
     sorted_entries = sorted(parsed_entries, key=lambda x: x.get("PY", ["0"])[0], reverse=True)
 
@@ -98,6 +150,13 @@ def main():
         formatted_entry = format_entry(entry)
         # 在标题前添加序号标记
         formatted_entry = formatted_entry.replace("标题：", f"[{index}] 标题：")
+        journal_name = entry.get("T2", [""])[0].upper().strip()
+        print("Processing journal:", journal_name)
+        if journal_name in jcr_data:
+            jcr_ranking = get_jcr_ranking(jcr_data[journal_name])
+            print("JCR ranking is: ", jcr_ranking)
+            print("Found JCR ranking:", jcr_ranking)
+            formatted_entry = formatted_entry.replace("JCR分区：", f"JCR分区：{jcr_ranking}")
         formatted_entries.append(formatted_entry)
 
     formatted_text = "\n\n".join(formatted_entries)
