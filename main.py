@@ -145,10 +145,10 @@ def format_entry(entry):
 
 
 def main():
-    with open("sample.ris", "r", encoding="utf-8") as f:
+    with open("sample.ris", "r", encoding="utf-8") as f:  # change the path of file
         ris_text = f.read()
 
-    jcr_data = load_jcr_data("2021JCR.xlsx")
+    jcr_data = load_jcr_data("2021JCR.xlsx")  # change the path of file
 
     parsed_entries = parse_ris(ris_text)
     sorted_entries = sorted(parsed_entries, key=lambda x: x.get("PY", ["0"])[0], reverse=True)
