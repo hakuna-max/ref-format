@@ -1,5 +1,5 @@
 
-# 该程序将webofscience上导出的ris文件，如：
+# 该程序将zotero上导出的ris文件，如：
 # TY  - JOUR
 # TI  - Assessing energy vulnerability and its impact on carbon emissions: A global case
 # AU  - Liu, Yang
@@ -117,7 +117,8 @@ def format_entry(entry):
     month = da_values[1] if len(da_values) > 1 else ""
 
     volume = entry.get("VL", [""])[0]
-    pages = entry.get("SP", [""])[0]
+    s_pages = entry.get("SP", [""])[0]
+    e_pages = entry.get("EP", [""])[0]
 
     month_map = {
         "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr",
@@ -128,7 +129,14 @@ def format_entry(entry):
     formatted_entry = f"标题：{title}\n"
     formatted_entry += f"作者：{authors}\n"
     formatted_entry += f"期刊名称：{journal}\n"
-    formatted_entry += f"出版时间：{month_map.get(month, month)} {year}；卷：{volume}，页：{pages}\n"
+
+    if e_pages:
+        formatted_entry += f"出版时间：{month_map.get(month, month)} {year}；卷：{volume}，页：{s_pages}-{e_pages}\n"
+    elif s_pages:
+        formatted_entry += f"出版时间：{month_map.get(month, month)} {year}；卷：{volume}，文献号：{s_pages}\n"
+    else:
+        formatted_entry += f"出版时间：{month_map.get(month, month)} {year}；卷：{volume}，文献号(页)：\n"
+
     formatted_entry += "JCR分区：\n"
     formatted_entry += "引用位置：\n"
     formatted_entry += "引用原句：\n"
