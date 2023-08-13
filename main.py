@@ -1,4 +1,3 @@
-
 # 该程序将zotero上导出的ris文件，如：
 # TY  - JOUR
 # TI  - Assessing energy vulnerability and its impact on carbon emissions: A global case
@@ -30,7 +29,7 @@
 # [2] 标题：Intersecting near-optimal spaces: European power systems with more resilience to weather variability
 # 作者：Grochowicz, Aleksander; van Greevenbroek, Koen; Benth, Fred Espen; Zeyringer, Marianne
 # 期刊名称：ENERGY ECONOMICS
-# 出版时间：Feb 2023；卷：118，页：106496
+# 出版时间：Feb 2023；卷：118，文献号：106496
 # JCR分区：SSCI一区
 # 引用位置：
 # 引用原句：
@@ -39,6 +38,7 @@
 
 
 import openpyxl
+
 
 def parse_ris(ris_text):
     entries = ris_text.split("ER  -")
